@@ -11,31 +11,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Schritt 1: Repository klonen
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # Schritt 2: Python installieren
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
 
+      # Schritt 3: Abhängigkeiten installieren
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install asyncpg python-dotenv
+
+      # Schritt 4: Umgebungsvariablen setzen
       - name: Set environment variables
-        env:
+        run: echo "Umgebungsvariablen gesetzt"
+        env:  # Stelle sicher, dass `secrets` korrekt definiert sind
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
 
+      # Schritt 5: Verbindung testen
       - name: Test Database Connection
         run: python test_db_connection.py
-        env:
+        env:  # Umgebungsvariablen für das Skript
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
+
+
+
