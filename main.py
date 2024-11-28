@@ -39,12 +39,14 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Globale Datenbankkonfiguration und Verbindungspool
 DATABASE_CONFIG = {
-    "user": os.getenv("DB_USER", "your_user"),
-    "password": os.getenv("DB_PASSWORD", "your_password"),
-    "database": os.getenv("DB_NAME", "your_database"),
-    "host": os.getenv("DB_HOST", "127.0.0.1"),
-    "port": os.getenv("DB_PORT", "5432"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "database": os.getenv("DB_NAME"),
+    "host": os.getenv("DB_HOST"),
+    "port": int(os.getenv("DB_PORT", 5432)),
+    "ssl": "require",  # SSL für Supabase
 }
+
 
 pool = None  # Connection-Pool
 
@@ -53,13 +55,19 @@ async def init_db_pool():
     try:
         print("Initialisiere den Datenbank-Pool...")
         pool = await asyncpg.create_pool(
-            **DATABASE_CONFIG,
+            user=DATABASE_CONFIG["user"],
+            password=DATABASE_CONFIG["password"],
+            database=DATABASE_CONFIG["database"],
+            host=DATABASE_CONFIG["host"],
+            port=DATABASE_CONFIG["port"],
+            ssl="require",  # SSL hinzufügen
             max_size=10,
-            statement_cache_size=0
+            statement_cache_size=0,
         )
         print("Datenbank-Pool erfolgreich initialisiert.")
     except Exception as e:
         print(f"Fehler beim Initialisieren des Datenbank-Pools: {e}")
+
 
 
 async def get_db_connection():
@@ -95,6 +103,18 @@ async def ensure_table_exists():
         print(f"Fehler beim Erstellen der Tabelle: {e}")
     finally:
         await release_db_connection(conn)
+
+async def test_db_connection():
+    conn = await get_db_connection()
+    try:
+        # Test, ob Policies korrekt greifen
+        test_query = await conn.fetchrow("SELECT * FROM users LIMIT 1")
+        print(f"Testabfrage erfolgreich: {test_query}")
+    except Exception as e:
+        print(f"Fehler bei der Testabfrage: {e}")
+    finally:
+        await release_db_connection(conn)
+
 
 # Benutzer-Synchronisierung
 async def sync_members():
