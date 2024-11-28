@@ -1,4 +1,4 @@
-# Datei: bot.py
+# Datei: main.py
 import discord
 from discord.ext import commands, tasks
 from discord import app_commands
@@ -12,6 +12,8 @@ from discord_presence import update_presence
 from flask import Flask
 import threading
 import asyncpg
+from flask_app import run_flask
+
 
 
 from asyncpg.pool import create_pool
@@ -49,10 +51,11 @@ pool = None  # Connection-Pool
 async def init_db_pool():
     global pool
     try:
+        print("Initialisiere den Datenbank-Pool...")
         pool = await asyncpg.create_pool(
             **DATABASE_CONFIG,
-            max_size=10,  # Maximale Verbindungen
-            statement_cache_size=0  # Deaktiviert vorbereitete Statements
+            max_size=10,
+            statement_cache_size=0
         )
         print("Datenbank-Pool erfolgreich initialisiert.")
     except Exception as e:
@@ -62,8 +65,12 @@ async def init_db_pool():
 async def get_db_connection():
     global pool
     if not pool:
+        print("Datenbank-Pool ist nicht initialisiert. Versuche, ihn zu initialisieren...")
         await init_db_pool()
+    if not pool:
+        raise RuntimeError("Datenbank-Pool konnte nicht initialisiert werden.")
     return await pool.acquire()
+
 
 async def release_db_connection(conn):
     global pool
@@ -288,7 +295,7 @@ async def on_ready():
     await update_presence(bot)
     print("Bot ist bereit und alle Hintergrundaufgaben wurden gestartet.")
 
-# Flask Setup
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -298,12 +305,11 @@ def home():
 def run_flask():
     app.run(port=12000)
 
-# Bot und Flask in separaten Threads ausführen
+# Flask starten
 if __name__ == '__main__':
-    # Starte Flask in einem Thread
     flask_thread = threading.Thread(target=run_flask)
-    flask_thread.daemon = True  # Sicherstellen, dass der Flask-Thread beendet wird, wenn das Hauptprogramm stoppt
+    flask_thread.daemon = True
     flask_thread.start()
+    print("Flask-Server läuft...")
 
-    # Starte den Discord Bot
-    bot.run(os.getenv("DISCORD_TOKEN"))
+bot.run(os.getenv("DISCORD_TOKEN"))

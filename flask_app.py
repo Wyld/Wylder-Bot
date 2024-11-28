@@ -67,6 +67,12 @@ def callback():
     else:
         return f'Fehler beim Abrufen der Benutzerdaten: {user_data}'
 
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot ist online!"
+
 def run_flask():
     port = int(os.environ.get("PORT", 12000))
     app.run(host="0.0.0.0", port=port)
