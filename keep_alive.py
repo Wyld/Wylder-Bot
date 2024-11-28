@@ -1,6 +1,7 @@
 from flask import Flask
 from threading import Thread
 
+
 app = Flask('')
 
 
@@ -10,7 +11,7 @@ def home():
 
 
 def run():
-    port = int(os.environ.get("PORT", 12000))
+    port = int(os.environ.get("Port", 12000))
     app.run(host='0.0.0.0', port=port)
 
 

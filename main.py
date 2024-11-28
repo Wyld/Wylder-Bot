@@ -37,15 +37,15 @@ intents.voice_states = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Globale Datenbankkonfiguration und Verbindungspool
 DATABASE_CONFIG = {
     "user": os.getenv("DB_USER"),
     "password": os.getenv("DB_PASSWORD"),
     "database": os.getenv("DB_NAME"),
     "host": os.getenv("DB_HOST"),
-    "port": int(os.getenv("DB_PORT", 5432)),
-    "ssl": "require",  # SSL für Supabase
+    "port": int(os.getenv("DB_PORT", 6543)),  # Verwende DB_PORT hier
+    "ssl": "require",
 }
+
 
 
 pool = None  # Connection-Pool
@@ -67,6 +67,8 @@ async def init_db_pool():
         print("Datenbank-Pool erfolgreich initialisiert.")
     except Exception as e:
         print(f"Fehler beim Initialisieren des Datenbank-Pools: {e}")
+        raise  # Weitergeben des Fehlers für Debugging
+
 
 
 
@@ -309,11 +311,15 @@ async def modify_points(interaction: discord.Interaction, member: discord.Member
 @bot.event
 async def on_ready():
     print(f"Bot {bot.user} ist online.")
-    await ensure_table_exists()
-    await sync_members()
-    award_voice_points.start()
-    await update_presence(bot)
-    print("Bot ist bereit und alle Hintergrundaufgaben wurden gestartet.")
+    try:
+        await ensure_table_exists()
+        await sync_members()
+        award_voice_points.start()
+        await update_presence(bot)
+        print("Bot ist bereit und alle Hintergrundaufgaben wurden gestartet.")
+    except Exception as e:
+        print(f"Fehler in on_ready: {e}")
+
 
 
 app = Flask(__name__)
@@ -322,6 +328,7 @@ app = Flask(__name__)
 def home():
     return "Bot ist online!"
 
+# Flask starten
 def run_flask():
     app.run(port=12000)
 
