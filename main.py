@@ -312,6 +312,12 @@ async def modify_points(interaction: discord.Interaction, member: discord.Member
     finally:
         await release_db_connection(conn)
 
+# /ping Command (für alle Benutzer)
+@bot.tree.command(name="ping")
+async def ping(interaction: discord.Interaction):
+    latency = round(bot.latency * 1000)  # Reaktionszeit in ms
+    await interaction.response.send_message(f"Ping: {latency} ms", ephemeral=True)
+
 
 # Bot starten
 @bot.event
