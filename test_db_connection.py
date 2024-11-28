@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 async def test_connection():
+    conn = None  # Initialisiere die Variable
     try:
         # Datenbankverbindung herstellen
         conn = await asyncpg.connect(
@@ -14,7 +15,7 @@ async def test_connection():
             password=os.getenv("DB_PASSWORD"),
             database=os.getenv("DB_NAME"),
             host=os.getenv("DB_HOST"),
-            port=int(os.getenv("DB_PORT", 6543)),
+            port=int(os.getenv("DB_PORT", 6543)),  # Standardport für PostgreSQL
             ssl="require"
         )
         print("Verbindung zur Datenbank erfolgreich!")
@@ -27,7 +28,7 @@ async def test_connection():
         print(f"Fehler bei der Verbindung zur Datenbank: {e}")
 
     finally:
-        if conn:
+        if conn:  # Schließe nur, wenn die Verbindung besteht
             await conn.close()
 
 # Hauptfunktion zum Ausführen des Tests
