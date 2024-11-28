@@ -1,0 +1,44 @@
+name: Restart Discord Bot
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Alle 6 Stunden
+  workflow_dispatch:  # Ermöglicht manuellen Start
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Code aus dem Repository auschecken
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Python einrichten
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'  # Python-Version anpassen
+
+      # 3. Abhängigkeiten installieren
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      # 4. Umgebungsvariablen bereitstellen
+      - name: Set up environment variables
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+        run: echo "Environment variables successfully configured."
+
+      # 5. Discord Bot ausführen
+      - name: Run Discord Bot
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+        run: |
+          python main.py
