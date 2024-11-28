@@ -11,6 +11,7 @@ from flask_app import keep_alive
 from discord_presence import update_presence
 from flask import Flask
 import threading
+import asyncpg
 
 
 from asyncpg.pool import create_pool
