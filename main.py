@@ -13,6 +13,12 @@ from flask import Flask
 import threading
 import asyncpg
 from flask_app import run_flask
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+logger.info("Bot Wylder Bot#8351 ist online.")
 
 
 
